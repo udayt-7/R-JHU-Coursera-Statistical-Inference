@@ -1,0 +1,148 @@
+---
+title: "R - Statistical Inference Course Project - Part 2"
+author: "Uday T"
+date: "27/08/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Now in the second portion of the project, we're going to analyze the ToothGrowth data in the R datasets package.
+
+1).Load the ToothGrowth data and perform some basic exploratory data analyses
+2).Provide a basic summary of the data.
+3).Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose. (Only use the techniques from class, even if there's other approaches worth considering)
+4).State your conclusions and the assumptions needed for your conclusions
+.
+## 1.Load the ToothGrowth data to perform some basic EDA
+```{r}
+library(datasets)
+data("ToothGrowth")
+library(ggplot2)
+```
+
+Exploring the contents of the dataset
+
+```{r}
+#How the dataset loks like
+head(ToothGrowth)
+```
+
+```{r}
+#Type of data and types of variables
+str(ToothGrowth)
+```
+
+##2).Provide a basic summary of the data.
+```{r}
+#Observations and Summary 
+table(ToothGrowth$dose, ToothGrowth$supp)
+print("---------------------------------")
+print(summary(ToothGrowth))
+
+```
+
+```{r}
+#Histogram of Tooth Length
+hist(ToothGrowth$len, main = "Histogram of Tooth Length",xlab = "Tooth length", ylab = "Frequency",
+     ylim = c(0,20),col  = "blue", lwd  = 3)
+```
+
+```{r}
+#Histogram of Dose
+hist(ToothGrowth$dose, main = "Histogram of Dose", xlab = "Dose", ylab = "Frequency",
+     ylim = c(0,25), col  = "red",slwd  = 1)
+```
+
+```{r echo = FALSE}
+ggplot(data=ToothGrowth, aes(x=as.factor(dose), y=len, fill=supp,)) +
+    geom_bar(stat="identity") +
+    facet_grid(. ~ supp) +
+    xlab("Dosage") +
+    ylab("Tooth length")
+
+
+```
+
+```{r}
+boxplot(len~supp+dose, data = ToothGrowth,
+        main = "Tooth Growth for Different Supplement Types and Doses",
+        xlab = "Supplement Types (OJ, VC)", ylab = "Length",
+        col  = c("orange","green"))
+```
+-- The Tooth length varies from 0 to 35, but most of the values range from 5 to 30
+-- There are 3 different dose types, 0.2, 1.0 and 2.0 wit equal frequencies, i.e 20 each!
+-- There are two different dosages, OJ and VC - Orange Juice and Vitamin C with 0.5 dose having least frequency and 2.0 having highest frequecy for both dosages
+
+Lets now conduct Hypothesis tests on Toothlength and Dose data,
+
+## 3. Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose.  
+```{r}
+# Let's perform t-test
+t.test(len ~ supp, paired = FALSE, var.equal = FALSE, data = ToothGrowth)
+```
+
+Let's compare Tooth Growth by dose
+```{r}
+t.test(len ~ supp, ToothGrowth[ToothGrowth$dose == .5, ])
+t.test(len ~ supp, ToothGrowth[ToothGrowth$dose == 1, ])
+t.test(len ~ supp, ToothGrowth[ToothGrowth$dose == 2, ])
+```
+
+So now we move on to dosage wise analysis, We'll split the data by range of values in Dosages:
+```{r}
+dose.one <- subset(ToothGrowth, dose %in% c(0.5, 1.0))
+dose.two <- subset(ToothGrowth, dose %in% c(1.0, 2.0))
+dose.three <- subset(ToothGrowth, dose %in% c(0.5, 2.0))
+```
+
+Our null hypothesis is that there is no difference in tooth length between the different dosages. 
+```{r}
+t.test(len ~ dose, paired=F, var.equal=F, data=dose.one)
+t.test(len ~ dose, paired=F, var.equal=F, data=dose.two)
+t.test(len ~ dose, paired=F, var.equal=F, data=dose.three)
+```
+
+##4).State your conclusions and the assumptions needed for your conclusions
+
+##Conclusions:
+
+
+
+The Tooth length varies from 0 to 35, but most of the values range from 5 to 30
+There are 3 different dose types, 0.2, 1.0 and 2.0 wit equal frequencies, i.e 20 each!
+There are two different dosages, OJ and VC - Orange Juice and Vitamin C with 0.5 dose having least frequency and 2.0 having highest frequecy for both dosages
+
+----------------------------------------------------------------------------
+
+The p-value is greater than 0.05 and the confidence interval of the test contains zero so we can say that supplement types seems to have no impact on Tooth growth based on this test.
+
+We also find a 95% confidence interval of -0.171, 7.571 for mean(OJ)-mean(VC). Our p value is 0.06063, which is not significant. Therefore, we would not reject the null hypothesis. 
+
+----------------------------------------------------------------------------
+
+Only the dose with value 1 is showing a significant impact on the Tooth Growth, This might also tell that the tooth growth has very less correlation or no correlation with dosage and dosage type, With a p-value = 0.06 and having zero in the confidence interval we can not reject the null hypothesis. 
+
+----------------------------------------------------------------------------
+
+DOSE ONE - We find a 95% confidence interval of -11.98, -6.27 for mean(0.5)-mean(1.0) with a p 
+           value of 1.268e-07. Therefore, we reject the null hypothesis.
+
+DOSE TWO - We find a 95% confidence interval of -8.99, -3.73 for mean(1.0)-mean(2.0) with a p value           of 1.906e-05. Therefore, we reject the null hypothesis. 
+
+DOSE THREE - We find a 95% confidence interval of -18.15, -12.83 for mean(0.5)-mean(2.0) with a p 
+             value of 4.398e-14. Therefore, we reject the null hypothesis. 
+
+The length increases with increase in dosage for both the supplements.In all three tests, we see that none of the 95% CL intervals include zero and they are always on the negative side.
+Therefore, we can claim, with 95% CL, that the is a positive correlation between the two variables.
+
+----------------------------------------------------------------------------
+
+We can conclude that supplement delivery method has no effect on Tooth Length even though they are positively correlated.
+
+----------------------------------------------------------------------------
+
+
+

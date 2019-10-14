@@ -1,0 +1,72 @@
+---
+title: "R - Statistical Inference Course Project - Part 1"
+author: "Uday T"
+date: "27 August 2019"
+output: pdf_document
+---
+
+
+
+## A Simulation Exercise
+In this project you will investigate the exponential distribution in R and compare it with the Central Limit Theorem. The exponential distribution can be simulated in R with rexp(n, lambda) where lambda is the rate parameter. The mean of exponential distribution is 1/lambda and the standard deviation is also 1/lambda. Set lambda = 0.2 for all of the simulations. You will investigate the distribution of averages of 40 exponentials. Note that you will need to do a thousand simulations.
+
+
+
+### 1.Show the sample mean and compare it to the theoretical mean of the distribution.
+We will create a simulation sample called simulated_samp each of size 40 drawn from exponential distribution with rate parameterlambda = 0.2 
+Seed will be set at 333 to make the simulation reproducible.
+
+
+```{r cars}
+library(ggplot2)
+# set seed for reproducability
+set.seed(333)
+# set lambda to 0.2
+lambda <- 0.2
+# 40 samples
+n <- 40
+# 1000 simulations
+n.sim <- 1000
+# simulate
+sim_sample <- matrix(rexp(n*n.sim, rate = lambda), nrow = n.sim, ncol = n)
+# calculate mean of exponentials
+sim_samp_mean <- apply(sim_sample, 1, mean)
+mean(sim_samp_mean)
+```
+
+```{r}
+# Theoritical mean
+theo_mean <- 1/lambda
+theo_mean
+```
+The sample mean is 5.0453, which is close to the theoretical mean!
+
+### 2.Show how variable the sample is (via variance) and compare it to the theoretical variance of the distribution.
+
+```{r}
+var(sim_samp_mean)
+```
+
+```{r}
+theo_var <- (1 / lambda ^ 2) / n
+theo_var
+```
+The sample variance is 0.626, which is also close the theoretical variance 0.625
+
+
+
+### 3.Show that the distribution is approximately normal
+```{r}
+data <- as.data.frame(sim_samp_mean)
+ggplot(data, aes(x = sim_samp_mean)) + 
+  geom_histogram(binwidth = 0.5, color = 'blue', fill = 'white', aes(y = ..density..)) +
+  stat_function( fun = dnorm, color = 'red', 
+                args = list(mean = 5, sd = sqrt(0.626))) +
+  xlab('Sample mean') +
+  ylab('Density') +
+  ggtitle('Sample distribution and Theoretical distribution')+
+  geom_vline(xintercept = c(mean(sim_samp_mean), 5), size = c(1,1), 
+               colour = c("blue", "red"))
+
+```
+The above figure shows the distribution of the sample mean. It is Approximately Normally Distributed (AND). The red density curve corresponds to N(5,0.626) density.This proves the Central Limit Theorem, As the sample size increases it will tend to move towards a perfectly normal distribution.
